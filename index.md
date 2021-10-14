@@ -1,5 +1,3 @@
-# Localcert
-
 Localcert is a service that helps developers issue TLS certificates signed by
 [Let's Encrypt](https://letsencrypt.org) that can be used for testing services
 on local networks.
