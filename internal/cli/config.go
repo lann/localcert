@@ -46,8 +46,6 @@ type Config struct {
 }
 
 func GetConfig() (*Config, error) {
-	flag.Parse()
-
 	dataDir := *flagDataDir
 	if dataDir == "" {
 		userConfigDir, err := os.UserConfigDir()
@@ -112,28 +110,23 @@ func (c *Config) ReadOrGenerateCertificateKey() (crypto.Signer, error) {
 			return nil, fmt.Errorf("encode: %w", err)
 		}
 
-		if err := os.WriteFile(c.KeyFile, keyBytes, filePerm); err != nil {
+		err = WritePEMFile(c.KeyFile, privateKeyPEMType, keyBytes)
+		if err != nil {
 			return nil, fmt.Errorf("write %q: %w", c.KeyFile, err)
 		}
 
 		return key, nil
 	} else {
-		return nil, fmt.Errorf("read: %w", err)
+		return nil, fmt.Errorf("read %q: %w", c.KeyFile, err)
 	}
 }
 
 func (c *Config) ReadCertificate() (*x509.Certificate, error) {
-	certBytes, err := os.ReadFile(c.CertificateFile)
+	certBytes, err := ReadPEMFile(c.CertificateFile, certificatePEMType)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read %q: %w", c.CertificateFile, err)
 	}
-
-	certs, err := x509.ParseCertificates(certBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return certs[0], nil
+	return x509.ParseCertificate(certBytes)
 }
 
 func (c *Config) Client() *localcert.Client {

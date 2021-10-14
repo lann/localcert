@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"flag"
 	"fmt"
@@ -96,7 +97,7 @@ func Provision() {
 
 	var buf bytes.Buffer
 	for _, certBytes := range certChain {
-		_, err := buf.Write(certBytes)
+		err := pem.Encode(&buf, &pem.Block{Type: certificatePEMType, Bytes: certBytes})
 		if err != nil {
 			log.Fatal("Error writing certificate: ", err)
 		}
@@ -112,5 +113,5 @@ func Provision() {
 func printCertInfo(config *Config, cert *x509.Certificate) {
 	fmt.Print("\nCertificate expires ", cert.NotAfter, "\n\n")
 	fmt.Println("Certificate (chain): ", config.CertificateFile)
-	fmt.Println("Certificate privkey:   ", config.KeyFile)
+	fmt.Println("Certificate privkey: ", config.KeyFile)
 }
