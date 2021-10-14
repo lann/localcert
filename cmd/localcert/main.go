@@ -9,14 +9,9 @@ import (
 
 func main() {
 	flag.Parse()
-
-	subcmd := "provision"
-	if len(flag.Args()) > 0 {
-		subcmd = flag.Args()[0]
-	}
-
-	switch subcmd {
-	case "provision":
+	subcmd := flag.Arg(0)
+	switch flag.Arg(0) {
+	case "provision", "":
 		cli.Provision()
 	case "test":
 		cli.Test()

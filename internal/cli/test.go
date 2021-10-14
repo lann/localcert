@@ -11,8 +11,9 @@ import (
 	"sync"
 )
 
+var flagTestPort = flag.Int("testPort", 8443, "port for test server")
+
 func Test() {
-	flagTestPort := flag.Int("testPort", 8443, "port for test server")
 
 	config, err := GetConfig()
 	if err != nil {

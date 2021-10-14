@@ -46,6 +46,7 @@ type Config struct {
 }
 
 func GetConfig() (*Config, error) {
+	flag.Parse()
 	dataDir := *flagDataDir
 	if dataDir == "" {
 		userConfigDir, err := os.UserConfigDir()
