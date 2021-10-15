@@ -31,10 +31,10 @@ func Provision() {
 		log.Fatalf("Error reading existing certificate %q: %v", config.CertificateFile, err)
 	}
 
-	var domain string
+	var certDomain string
 	if cert != nil {
-		domain = cert.Subject.CommonName
-		fmt.Printf("Found existing certificate for domain %q\n", domain)
+		certDomain = cert.Subject.CommonName
+		fmt.Printf("Found existing certificate for domain %q\n", certDomain)
 		if !*flagForceRenew {
 			expiresIn := time.Until(cert.NotAfter)
 			if expiresIn > 30*24*time.Hour {
@@ -44,7 +44,7 @@ func Provision() {
 			} else if expiresIn > 0 {
 				fmt.Println("Existing certificate expires in < 30 days and will be renewed")
 			} else {
-				fmt.Println("Existing certificate is expired and will be renewed")
+				fmt.Println("Existing certificate has expired and will be renewed")
 			}
 		}
 	}
@@ -67,11 +67,15 @@ func Provision() {
 		log.Fatalf("Error writing acmeAccount file %q: %v", config.ACMEAccountFile, err)
 	}
 
-	if domain == "" {
-		domain, err = client.GetDomain()
-		if err != nil {
-			log.Fatal("Error getting localcert domain name: ", err)
-		}
+	domain, err := client.GetDomain()
+	if err != nil {
+		log.Fatal("Error getting localcert domain name: ", err)
+	}
+
+	if certDomain != "" && certDomain != domain {
+		fmt.Print("The localcert server has assigned you a new domain!\n\n")
+		fmt.Printf("  Old domain: %q\n", certDomain)
+		fmt.Printf("  New domain: %q\n\n", domain)
 	}
 
 	fmt.Printf("Provisioning domain %q...\n", domain)

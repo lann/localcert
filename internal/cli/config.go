@@ -28,7 +28,7 @@ const (
 var (
 	flagDataDir          = flag.String("dataDir", "", "default data directory")
 	flagServerURL        = flag.String("serverUrl", defaultServerURL, "localcert server URL")
-	flagACMEDirectoryURL = flag.String("acmeUrl", defaultACMEDirectoryURL, "ACME directory URL")
+	flagACMEDirectoryURL = flag.String("acmeUrl", "", "ACME directory URL")
 	flagACMEAccountFile  = flag.String("acmeAccount", "", "path to ACME account file")
 	flagCertificateFile  = flag.String("localCert", "", "path to localcert certificate")
 	flagKeyFile          = flag.String("localKey", "", "path to localcert certificate key")
@@ -153,12 +153,17 @@ type ACMEAccount struct {
 }
 
 func (c *Config) readOrGenerateACMEAccount() error {
+	dirURL := *flagACMEDirectoryURL
 	fileBytes, err := os.ReadFile(c.ACMEAccountFile)
 	if err == nil {
 		c.ACME = &ACMEAccount{}
 		err := json.Unmarshal(fileBytes, c.ACME)
 		if err != nil {
 			return fmt.Errorf("decode acmeAccount: %w", err)
+		}
+
+		if dirURL != "" && dirURL != c.ACME.DirectoryURL {
+			return fmt.Errorf("acmeAccount directory URL %q != acmeUrl %q", c.ACME.DirectoryURL, dirURL)
 		}
 
 		jwk := c.ACME.PrivateKey
@@ -172,6 +177,9 @@ func (c *Config) readOrGenerateACMEAccount() error {
 		key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 		if err != nil {
 			return fmt.Errorf("generate key: %w", err)
+		}
+		if dirURL == "" {
+			dirURL = defaultACMEDirectoryURL
 		}
 		c.ACME = &ACMEAccount{
 			DirectoryURL: *flagACMEDirectoryURL,
