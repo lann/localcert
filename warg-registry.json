@@ -1,0 +1,8 @@
+---
+layout: none
+permalink: .well-known/warg/registry.json
+---
+{
+        "ociRegistry": "ghcr.io",
+        "ociNamespacePrefix": "bytecodealliance/warg/"
+}
